@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inscription - Elektable</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">
+      <img src="logo.svg" alt="Elektable Logo">
+      Elektable
+    </div>
+    <ul>
+      <li><a href="acheter.html">Acheter</a></li>
+      <li><a href="#">Vendre</a></li>
+      <li><a href="#">Marché</a></li>
+      <li><a href="#">Mon Compte</a></li>
+    </ul>
+  </nav>
+
+  <header>
+    <h1>Inscrivez-vous sur Elektable</h1>
+    <p>Rejoignez notre plateforme et commencez à acheter ou vendre de l'électricité.</p>
+  </header>
+
+  <main id="signup">
+    <form action="#" method="post">
+      <h2>Créer un compte</h2>
+  
+      <label for="name">Prénom</label>
+      <input type="text" id="name" name="name" required>
+  
+      <label for="surname">Nom de famille</label>
+      <input type="text" id="surname" name="surname" required>
+  
+      <label for="email">Adresse e-mail</label>
+      <input type="email" id="email" name="email" required>
+  
+      <label for="password">Mot de passe</label>
+      <input type="password" id="password" name="password" required>
+  
+      <label for="confirm-password">Confirmer le mot de passe</label>
+      <input type="password" id="confirm-password" name="confirm-password" required>
+  
+      <!-- Début de la boîte Adresse -->
+      <div class="address-box">
+        <h3>Adresse</h3>
+  
+        <label for="street">Rue</label>
+        <input type="text" id="street" name="address[street]" required>
+  
+        <label for="city">Ville</label>
+        <input type="text" id="city" name="address[city]" required>
+  
+        <label for="postal_code">Code Postal</label>
+        <input type="text" id="postal_code" name="address[postal_code]" required>
+  
+        <label for="country">Pays</label>
+        <input type="text" id="country" name="address[country]" required>
+      </div>
+      <!-- Fin de la boîte Adresse -->
+  
+      <button type="submit">S'inscrire</button>
+  
+      <p>Vous avez déjà un compte ? <a href="login.html">Connectez-vous</a></p>
+    </form>
+  </main>
+  
+
+  <footer>
+    <p>&copy; 2024 Elektable. Tous droits réservés.</p>
+  </footer>
+
+</body>
+</html>

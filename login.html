@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Elektable</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <nav>
+        <div class="logo">
+            <img src="logo.svg" alt="Elektable Logo">
+            Elektable
+        </div>
+        <ul>
+            <li><a href="acheter.html">Acheter</a></li>
+            <li><a href="#">Vendre</a></li>
+            <li><a href="#">Marché</a></li>
+            <li><a href="signup.html">S'inscrire</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section class="form-container">
+            <h2>Connexion</h2>
+            <form action="dashboard.html" method="POST">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" name="email" required placeholder="Votre e-mail">
+                
+                <label for="password">Mot de passe</label>
+                <input type="password" id="password" name="password" required placeholder="Votre mot de passe">
+                
+                <button type="submit">Se Connecter</button>
+            </form>
+            <p>Pas encore inscrit ? <a href="signup.html">Créer un compte</a></p>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Elektable. Tous droits réservés.</p>
+    </footer>
+
+</body>
+</html>
