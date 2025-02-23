@@ -2,7 +2,8 @@ body {
   font-family: sans-serif;
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* Ensure body takes up full viewport height */
+  min-height: 100vh;
+  /* Ensure body takes up full viewport height */
   margin: 0;
   background-color: #f4f4f4;
   color: #333;
@@ -55,9 +56,12 @@ header h1 {
   font-size: 2.5em;
   margin-bottom: 10px;
 }
+
 main {
-  flex: 1; /* Allow main content to expand to fill available space */
+  flex: 1;
+  /* Allow main content to expand to fill available space */
 }
+
 header p {
   font-size: 1.2em;
   color: #666;
@@ -114,7 +118,8 @@ button {
 }
 
 #achat-options {
-  text-align: center; /* Centre le titre */
+  text-align: center;
+  /* Centre le titre */
   padding: 50px 20px;
 }
 
@@ -126,8 +131,10 @@ button {
 .fournisseurs-container {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center; /* Centre les fournisseurs */
-  gap: 20px; /* Ajoute un peu d'espace */
+  justify-content: center;
+  /* Centre les fournisseurs */
+  gap: 20px;
+  /* Ajoute un peu d'espace */
   padding: 20px;
 }
 
@@ -141,36 +148,46 @@ button {
   border: 1px solid #ddd;
 }
 
-.fournisseur button{
-background-color: #4CAF50;
-color: white;
-padding: 10px 20px;
-margin-top: 20px;
-border: none;
-cursor: pointer;
-font-size: 1em;
+.fournisseur button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  margin-top: 20px;
+  border: none;
+  cursor: pointer;
+  font-size: 1em;
   border-radius: 5px;
-  width: 100%; /* Make button full width */
-  box-sizing: border-box; /* Include padding in width */
+  width: 100%;
+  /* Make button full width */
+  box-sizing: border-box;
+  /* Include padding in width */
 }
 
 
 
 footer {
-background-color: #333;
-color: #fff;
-text-align: center;
-padding: 10px; /* Reduced padding */
-position: relative; /* Allow positioning relative to the document */
-bottom: 0; /* Stick to the bottom */
-width: 100%; /* Full width */
-  margin-top: 50px; /* Add some top margin */
-  clear: both; /* Prevent content from overlapping */
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  padding: 10px;
+  /* Reduced padding */
+  position: relative;
+  /* Allow positioning relative to the document */
+  bottom: 0;
+  /* Stick to the bottom */
+  width: 100%;
+  /* Full width */
+  margin-top: 50px;
+  /* Add some top margin */
+  clear: both;
+  /* Prevent content from overlapping */
 }
+
 #why-us {
   text-align: center;
   padding: 50px 20px;
-  background-color: #f9f9f9; /* Léger fond pour le contraste */
+  background-color: #f9f9f9;
+  /* Léger fond pour le contraste */
 }
 
 .why-container {
@@ -192,11 +209,157 @@ width: 100%; /* Full width */
 }
 
 .reason img {
-  width: 60px; /* Ajuste la taille des icônes */
+  width: 60px;
+  /* Ajuste la taille des icônes */
   margin-bottom: 15px;
 }
 
 .reason p {
   font-size: 1.1em;
   color: #555;
+}
+
+#signup {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 50px 20px;
+}
+
+form {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+form h2 {
+  margin-bottom: 20px;
+}
+
+form label {
+  display: block;
+  text-align: left;
+  font-weight: bold;
+  margin-top: 10px;
+  margin-right: 20px;
+}
+
+form input {
+  width: 90%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1em;
+  margin-right: 20px;
+}
+
+form h3 {
+  margin-top: 20px;
+  text-align: left;
+  font-size: 1.2em;
+  color: #333;
+}
+
+form button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  margin-top: 20px;
+  border: none;
+  cursor: pointer;
+  font-size: 1em;
+  border-radius: 5px;
+  width: 100%;
+}
+
+form p {
+  margin-top: 15px;
+  font-size: 0.9em;
+}
+
+form p a {
+  color: #4CAF50;
+  text-decoration: none;
+}
+
+form p a:hover {
+  text-decoration: underline;
+}
+
+.address-box {
+  background: #f9f9f9;
+  /* Légère couleur de fond pour démarquer */
+  padding: 15px;
+  border-radius: 5px;
+  margin-top: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ddd;
+}
+
+.address-box h3 {
+  margin-bottom: 10px;
+  color: #333;
+  font-size: 1.2em;
+}
+
+.form-container {
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.form-container h2 {
+  margin-bottom: 20px;
+}
+
+.form-container form {
+  display: flex;
+  flex-direction: column;
+  max-width: 80%;
+}
+
+.form-container label {
+  text-align: left;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.form-container input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.form-container button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px;
+  margin-top: 15px;
+  border: none;
+  cursor: pointer;
+  font-size: 1em;
+  border-radius: 5px;
+}
+
+.form-container p {
+  margin-top: 15px;
+  font-size: 0.9em;
+}
+
+.form-container a {
+  color: #4CAF50;
+  text-decoration: none;
+  font-weight: bold;
 }
