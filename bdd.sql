@@ -114,12 +114,3 @@ VALUES
 (1, 'Carte Bancaire', 60.00, 'réussi'),
 (2, 'PayPal', 80.00, 'en attente');
 
-ALTER TABLE paiement
-ADD CONSTRAINT chk_montant_paiement CHECK (montant >= 0);
-
-
-ALTER TABLE produit
-ADD CONSTRAINT chk_prix_unitaire CHECK (prix_unitaire >= 0);
-
-ALTER TABLE commande_produit
-ADD CONSTRAINT chk_quantite_positive CHECK (quantite > 0);
