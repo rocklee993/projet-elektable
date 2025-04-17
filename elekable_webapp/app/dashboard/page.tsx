@@ -1,33 +1,44 @@
 "use client"
 
-import { useEffect } from "react"
-import { Battery, BatteryCharging, TrendingDown, TrendingUp } from "lucide-react"
+import { useEffect, useState } from "react"
+import Link from "next/link"
+import { Battery, BatteryCharging, CreditCard, TrendingDown, TrendingUp } from "lucide-react"
 
+import { getUserBalance } from "@/lib/api"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import ElectricityPriceChart from "@/components/electricity-price-chart"
 import { MarketActions } from "@/components/market-actions"
 import { RecentTransactions } from "@/components/recent-transactions"
+import { UserBalance } from "@/components/user-balance"
 
 export default function DashboardPage() {
-  // Initialiser la base de données au chargement de la page
+  const [balance, setBalance] = useState<number | null>(null)
+  const [refreshKey, setRefreshKey] = useState(0)
+
   useEffect(() => {
-    const initDatabase = async () => {
+    const fetchBalance = async () => {
       try {
-        await fetch("/api/init")
-        console.log("Base de données initialisée")
+        const data = await getUserBalance()
+        setBalance(data.balance)
       } catch (error) {
-        console.error("Erreur lors de l'initialisation de la base de données:", error)
+        console.error("Erreur lors de la récupération du solde:", error)
       }
     }
 
-    initDatabase()
-  }, [])
+    fetchBalance()
+  }, [refreshKey])
+
+  const handleTransactionComplete = () => {
+    setRefreshKey((prev) => prev + 1)
+  }
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Tableau de bord</h1>
+        <UserBalance className="text-lg" key={refreshKey} />
       </div>
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
@@ -42,7 +53,9 @@ export default function DashboardPage() {
                 <TrendingUp className="h-4 w-4 text-green-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">245,67 €</div>
+                <div className="text-2xl font-bold">
+                  {balance !== null ? `${balance.toFixed(2)} €` : "Chargement..."}
+                </div>
                 <p className="text-xs text-muted-foreground">+12% par rapport au mois dernier</p>
               </CardContent>
             </Card>
@@ -93,7 +106,7 @@ export default function DashboardPage() {
                 <CardDescription>Achetez ou vendez de l'électricité au prix actuel</CardDescription>
               </CardHeader>
               <CardContent>
-                <MarketActions />
+                <MarketActions onTransactionComplete={handleTransactionComplete} />
               </CardContent>
             </Card>
           </div>
@@ -121,7 +134,50 @@ export default function DashboardPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Moyens de paiement</CardTitle>
+            <CardDescription>Gérez vos cartes de paiement pour l'achat d'électricité</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center justify-center space-y-4 py-6">
+            <CreditCard className="h-12 w-12 text-primary" />
+            <div className="text-center">
+              <h3 className="text-lg font-medium">Gérez vos moyens de paiement</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Ajoutez ou supprimez des cartes de paiement pour vos achats d'électricité
+              </p>
+            </div>
+            <Button asChild>
+              <Link href="/dashboard/payment">Gérer mes cartes</Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Recharger mon solde</CardTitle>
+            <CardDescription>Ajoutez des fonds à votre compte pour acheter de l'électricité</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center justify-center space-y-4 py-6">
+            <div className="rounded-full bg-primary/10 p-3">
+              <TrendingUp className="h-8 w-8 text-primary" />
+            </div>
+            <div className="text-center">
+              <h3 className="text-lg font-medium">
+                Solde actuel: {balance !== null ? `${balance.toFixed(2)} €` : "Chargement..."}
+              </h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Rechargez votre solde pour faciliter vos achats d'électricité
+              </p>
+            </div>
+            <Button asChild>
+              <Link href="/dashboard/buy">Acheter de l'électricité</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
-

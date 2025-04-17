@@ -6,6 +6,7 @@ import { Loader2, Zap } from "lucide-react"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 
+import { getCurrentPrice, sellElectricity } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -13,7 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Slider } from "@/components/ui/slider"
 import { toast } from "@/hooks/use-toast"
 import ElectricityPriceChart from "@/components/electricity-price-chart"
-import { getCurrentPrice, sellElectricity } from "@/lib/api"
+import { UserBalance } from "@/components/user-balance"
 
 const formSchema = z.object({
   amount: z
@@ -30,6 +31,7 @@ export default function SellPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [currentPrice, setCurrentPrice] = useState(0.1842) // Prix par défaut
   const [isPriceFetching, setIsPriceFetching] = useState(true)
+  const [refreshBalance, setRefreshBalance] = useState(0)
   const commissionRate = 0.05 // 5% de commission
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -42,9 +44,6 @@ export default function SellPage() {
   useEffect(() => {
     const fetchCurrentPrice = async () => {
       try {
-        // Appeler d'abord l'API d'initialisation pour s'assurer que la BD est prête
-        await fetch("/api/init")
-
         const data = await getCurrentPrice()
         if (data && data.price) {
           setCurrentPrice(data.price)
@@ -70,6 +69,9 @@ export default function SellPage() {
     try {
       const result = await sellElectricity(values.amount)
 
+      // Mettre à jour le solde après la vente
+      setRefreshBalance((prev) => prev + 1)
+
       toast({
         title: "Vente effectuée avec succès!",
         description: `Vous avez vendu ${values.amount} kWh pour un montant de ${totalEarnings} €.`,
@@ -91,6 +93,7 @@ export default function SellPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Vendre de l'électricité</h1>
+        <UserBalance className="text-lg" key={refreshBalance} />
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -197,4 +200,3 @@ export default function SellPage() {
     </div>
   )
 }
-

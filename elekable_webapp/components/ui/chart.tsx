@@ -118,4 +118,3 @@ export function Line({
 
   return <ReactChartJSLine data={chartData} options={options} />
 }
-
