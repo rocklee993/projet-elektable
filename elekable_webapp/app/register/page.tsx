@@ -64,27 +64,34 @@ export default function RegisterPage() {
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true)
-
+    setIsLoading(true);
+  
     try {
-      // Simuler un appel API
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      console.log(values)
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values),
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Erreur lors de l’inscription.');
+      }
+  
       toast({
-        title: "Compte créé avec succès!",
-        description: "Vous allez être redirigé vers la page de connexion.",
-      })
-
-      router.push("/login")
-    } catch (error) {
+        title: 'Compte créé avec succès!',
+        description: 'Vous allez être redirigé vers la page de connexion.',
+      });
+  
+      router.push('/login');
+    } catch (error: any) {
       toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la création du compte.",
-        variant: "destructive",
-      })
+        title: 'Erreur',
+        description: error.message,
+        variant: 'destructive',
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 

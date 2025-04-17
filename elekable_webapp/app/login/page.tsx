@@ -35,27 +35,41 @@ export default function LoginPage() {
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true)
-
+    console.log("Login form values:", values); // Debug log
+    setIsLoading(true);
+  
     try {
-      // Simuler un appel API
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      console.log(values)
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values),
+      });
+  
+      console.log("Response status:", response.status); // Debug log
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.log("Error response:", errorData); // Debug log
+        throw new Error(errorData.message || 'Erreur de connexion.');
+      }
+  
+      const data = await response.json();
+      console.log("Login successful, data:", data); // Debug log
       toast({
-        title: "Connexion réussie!",
-        description: "Vous allez être redirigé vers votre tableau de bord.",
-      })
-
-      router.push("/dashboard")
-    } catch (error) {
+        title: 'Connexion réussie!',
+        description: 'Bienvenue!',
+      });
+  
+      router.push('/dashboard');
+    } catch (error: any) {
+      console.error("Login error:", error); // Debug log
       toast({
-        title: "Erreur de connexion",
-        description: "Email ou mot de passe incorrect.",
-        variant: "destructive",
-      })
+        title: 'Erreur de connexion',
+        description: error.message,
+        variant: 'destructive',
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 

@@ -1,9 +1,16 @@
 const express = require('express');
+const cors = require('cors');
 const app = express();
 require('dotenv').config();
 
 // Middleware pour parser le JSON dans les requêtes
 app.use(express.json());
+
+// Configure CORS
+app.use(cors({
+    origin: 'http://localhost:3001', // Replace with your frontend's URL
+    credentials: true, // Allow cookies and credentials
+}));
 
 // Importer le module des routes
 const routes = require('./routes');

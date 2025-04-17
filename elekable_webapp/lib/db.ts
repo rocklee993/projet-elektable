@@ -145,7 +145,7 @@ export function ensureDefaultUser() {
     // Créer un utilisateur par défaut
     const insertUser = db.prepare(`
       INSERT INTO users (id, firstName, lastName, email, password, phone, address, birthDate, balance)
-      VALUES (1, 'Jean', 'Dupont', 'jean.dupont@exemple.fr', ?, '0612345678', '123 Rue de l\'Exemple, 75000 Paris', '1985-05-15', 500.0)
+      VALUES (1, 'Jean', 'Dupont', 'jean.dupont@exemple.fr', ?, '0612345678', '123 Rue de l''Exemple, 75000 Paris', '1985-05-15', 500.0)
     `)
 
     insertUser.run(hashPassword("password123"))

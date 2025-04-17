@@ -133,38 +133,42 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 // Authentification
 export async function registerUser(userData: {
-  firstName: string
-  lastName: string
-  email: string
-  password: string
-  confirmPassword: string
-  phone: string
-  address: string
-  birthDate: Date
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  phone: string;
+  address: string;
+  birthDate: Date;
 }) {
-  await delay(1000) // Simuler un délai réseau
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(userData),
+  });
 
-  // Simuler un enregistrement réussi
-  return {
-    success: true,
-    message: "Utilisateur créé avec succès",
-    userId: 2,
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Erreur lors de l’inscription.');
   }
+
+  return response.json();
 }
 
 export async function loginUser(credentials: { email: string; password: string }) {
-  await delay(800) // Simuler un délai réseau
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(credentials),
+  });
 
-  // Simuler une connexion réussie
-  return {
-    success: true,
-    user: {
-      id: mockState.user.id,
-      firstName: mockState.user.firstName,
-      lastName: mockState.user.lastName,
-      email: mockState.user.email,
-    },
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Erreur de connexion.');
   }
+
+  return response.json();
 }
 
 export async function logoutUser() {
