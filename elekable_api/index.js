@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+require('dotenv').config();
 
 // Middleware pour parser le JSON dans les requêtes
 app.use(express.json());
@@ -8,7 +9,7 @@ app.use(express.json());
 const routes = require('./routes');
 
 // Utiliser les routes, par exemple sous le préfixe /api
-app.use('/api', routes);
+app.use('', routes);
 
 // Démarrage du serveur sur le port 3000
 const port = process.env.PORT || 3000;
