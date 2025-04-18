@@ -474,4 +474,44 @@ router.put('/api/payment/methods/:id', authenticateToken, async (req, res) => {
     }
 });
 
+//= /api/users/password (PUT) ========
+router.put('/api/users/password', authenticateToken, async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+        return res.status(400).json({ success: false, message: 'Champs requis manquants' });
+    }
+
+    try {
+        // Fetch the user's current password hash
+        const [rows] = await db.promise().query(
+            'SELECT mot_de_passe FROM utilisateur WHERE id_utilisateur = ?',
+            [req.user.id]
+        );
+
+        if (!rows.length) {
+            return res.status(404).json({ success: false, message: 'Utilisateur non trouvé' });
+        }
+
+        const isMatch = await bcrypt.compare(currentPassword, rows[0].mot_de_passe);
+        if (!isMatch) {
+            return res.status(400).json({ success: false, message: 'Mot de passe actuel incorrect' });
+        }
+
+        // Hash the new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Update the password in the database
+        await db.promise().execute(
+            'UPDATE utilisateur SET mot_de_passe = ? WHERE id_utilisateur = ?',
+            [hashedPassword, req.user.id]
+        );
+
+        res.json({ success: true, message: 'Mot de passe mis à jour avec succès' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Erreur serveur' });
+    }
+});
+
 module.exports = router;
