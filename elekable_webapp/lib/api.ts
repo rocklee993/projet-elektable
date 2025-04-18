@@ -133,6 +133,17 @@ function generateInvoiceNumber(): string {
   return `INV-${Math.floor(Math.random() * 10000).toString().padStart(4, "0")}`;
 }
 
+function maskCardNumber(cardNumber: string): string {
+  const cleaned = cardNumber.replace(/\s+/g, "");
+  if (cleaned.length <= 8) return cleaned;
+
+  const firstFour = cleaned.substring(0, 4);
+  const lastFour = cleaned.substring(cleaned.length - 4);
+  const masked = "X".repeat(cleaned.length - 8);
+
+  return `${firstFour} ${masked.substring(0, 4)} ${masked.substring(4, 8)} ${lastFour}`;
+}
+
 function createTransaction(type: "Achat" | "Vente", quantity: number, paymentMethod: string, price: number, commission = 0) {
   const amount = quantity * price;
   const netAmount = type === "Vente" ? amount - commission : amount;
@@ -165,6 +176,96 @@ function createTransaction(type: "Achat" | "Vente", quantity: number, paymentMet
   return { transaction, invoice };
 }
 
+// Authentification
+export async function registerUser(userData: {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  phone: string;
+  address: string;
+  birthDate: Date;
+}) {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(userData),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Erreur lors de l\'inscription.');
+  }
+
+  return response.json();
+}
+
+export async function loginUser(credentials: { email: string; password: string }) {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(credentials),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Erreur de connexion.');
+  }
+
+  return response.json();
+}
+
+export async function logoutUser() {
+  await delay(500);
+  return {
+    success: true,
+    message: "Déconnexion réussie",
+  };
+}
+
+// Profil utilisateur
+export async function getUserProfile() {
+  await delay(700);
+  return mockState.user;
+}
+
+export async function updateUserProfile(userData: {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  address: string;
+  birthDate: Date;
+}) {
+  await delay(1000);
+
+  mockState.user = {
+    ...mockState.user,
+    firstName: userData.firstName,
+    lastName: userData.lastName,
+    phone: userData.phone,
+    address: userData.address,
+    birthDate: userData.birthDate.toISOString().split("T")[0],
+  };
+
+  return {
+    success: true,
+    message: "Profil mis à jour avec succès",
+  };
+}
+
+// Prix de l'électricité
+export async function getElectricityPrices() {
+  await delay(600);
+  return mockState.electricityPrices;
+}
+
+export async function getCurrentPrice() {
+  await delay(300);
+  return { price: mockState.currentPrice };
+}
+
+// Transactions
 export async function buyElectricity(amount: number, useCard = false) {
   await delay(1200);
 
@@ -221,5 +322,140 @@ export async function sellElectricity(amount: number) {
     },
     invoiceNumber: invoice.invoiceNumber,
     balance: mockState.user.balance,
+  };
+}
+
+export async function getTransactionHistory(limit = 10) {
+  await delay(800);
+  return mockState.transactions.slice(0, limit);
+}
+
+// Factures
+export async function getInvoices() {
+  const token = localStorage.getItem("token");
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/invoices`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Erreur lors de la récupération des factures");
+  }
+
+  return response.json();
+}
+
+export async function getInvoiceDetails(invoiceId: string) {
+  await delay(700);
+  const invoice = mockState.invoices.find((inv) => inv.id === invoiceId);
+
+  if (!invoice) {
+    throw new Error("Facture non trouvée");
+  }
+
+  return {
+    invoice,
+    user: {
+      firstName: mockState.user.firstName,
+      lastName: mockState.user.lastName,
+      email: mockState.user.email,
+      address: mockState.user.address,
+    },
+  };
+}
+
+// Solde utilisateur
+export async function getUserBalance() {
+  await delay(400);
+  return { balance: mockState.user.balance };
+}
+
+export async function updateUserBalance(amount: number) {
+  await delay(600);
+  mockState.user.balance += amount;
+  return {
+    success: true,
+    balance: mockState.user.balance,
+  };
+}
+
+// Méthodes de paiement
+export async function getPaymentMethods() {
+  await delay(700);
+  return mockState.paymentMethods;
+}
+
+export async function addPaymentMethod(paymentMethod: {
+  type: string;
+  cardNumber: string;
+  cardHolder: string;
+  expiryDate: string;
+  isDefault: boolean;
+}) {
+  await delay(1000);
+
+  if (paymentMethod.isDefault) {
+    mockState.paymentMethods = mockState.paymentMethods.map((method) => ({
+      ...method,
+      isDefault: false,
+    }));
+  }
+
+  const cardNumber = maskCardNumber(paymentMethod.cardNumber);
+  const newMethod = {
+    id: (mockState.paymentMethods.length + 1).toString(),
+    ...paymentMethod,
+    cardNumber,
+  };
+
+  mockState.paymentMethods.push(newMethod);
+
+  return {
+    success: true,
+    id: newMethod.id,
+    message: "Méthode de paiement ajoutée avec succès",
+  };
+}
+
+export async function deletePaymentMethod(id: string) {
+  await delay(800);
+  const methodIndex = mockState.paymentMethods.findIndex((method) => method.id === id);
+
+  if (methodIndex === -1) {
+    throw new Error("Méthode de paiement non trouvée");
+  }
+
+  const wasDefault = mockState.paymentMethods[methodIndex].isDefault;
+  mockState.paymentMethods.splice(methodIndex, 1);
+
+  if (wasDefault && mockState.paymentMethods.length > 0) {
+    mockState.paymentMethods[0].isDefault = true;
+  }
+
+  return {
+    success: true,
+    message: "Méthode de paiement supprimée avec succès",
+  };
+}
+
+export async function setDefaultPaymentMethod(id: string) {
+  await delay(600);
+  const methodIndex = mockState.paymentMethods.findIndex((method) => method.id === id);
+
+  if (methodIndex === -1) {
+    throw new Error("Méthode de paiement non trouvée");
+  }
+
+  mockState.paymentMethods = mockState.paymentMethods.map((method) => ({
+    ...method,
+    isDefault: false,
+  }));
+
+  mockState.paymentMethods[methodIndex].isDefault = true;
+
+  return {
+    success: true,
+    message: "Méthode de paiement définie par défaut avec succès",
   };
 }
