@@ -55,6 +55,8 @@ export default function LoginPage() {
   
       const data = await response.json();
       console.log("Login successful, data:", data); // Debug log
+      console.log("Token:", data.accessToken); // Debug log
+      localStorage.setItem('token', data.accessToken);
       toast({
         title: 'Connexion réussie!',
         description: 'Bienvenue!',

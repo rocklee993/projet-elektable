@@ -364,11 +364,19 @@ export async function getTransactionHistory(limit = 10) {
 }
 
 // Factures
-export async function getInvoices(limit = 10) {
-  await delay(800) // Simuler un délai réseau
+export async function getInvoices() {
+  const token = localStorage.getItem("token"); // Retrieve the token
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/invoices`, {
+    headers: {
+      Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+    },
+  });
 
-  // Retourner les factures mockées limitées
-  return mockState.invoices.slice(0, limit)
+  if (!response.ok) {
+    throw new Error("Erreur lors de la récupération des factures");
+  }
+
+  return response.json(); // Return the fetched invoices
 }
 
 export async function getInvoiceDetails(invoiceId: string) {

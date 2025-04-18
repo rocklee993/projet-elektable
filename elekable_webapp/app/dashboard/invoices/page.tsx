@@ -148,7 +148,7 @@ export default function InvoicesPage() {
                 ) : (
                   filteredInvoices.map((invoice) => (
                     <TableRow key={invoice.id}>
-                      <TableCell className="font-medium">{invoice.invoiceNumber}</TableCell>
+                      <TableCell className="font-medium">{invoice.id}</TableCell>
                       <TableCell>{new Date(invoice.date).toLocaleDateString()}</TableCell>
                       <TableCell>
                         <span className={invoice.type === "Achat" ? "text-blue-500" : "text-green-500"}>
