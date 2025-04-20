@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "@/hooks/use-toast"
 import { buyElectricity, sellElectricity } from "@/lib/api"
 
-export function MarketActions() {
+export function MarketActions({ onTransactionComplete }) {
   const [buyAmount, setBuyAmount] = useState("50")
   const [sellAmount, setSellAmount] = useState("25")
   const [isLoading, setIsLoading] = useState(false)
@@ -26,12 +26,13 @@ export function MarketActions() {
       // Appeler d'abord l'API d'initialisation pour s'assurer que la BD est prête
       await fetch("/api/init")
 
-      const result = await buyElectricity(Number.parseFloat(buyAmount))
+      await buyElectricity(Number.parseFloat(buyAmount))
       toast({
         title: "Achat effectué avec succès!",
         description: `Vous avez acheté ${buyAmount} kWh pour un montant de ${(Number.parseFloat(buyAmount) * currentPrice).toFixed(2)} €.`,
       })
       setBuyAmount("50")
+      onTransactionComplete()
     } catch (error: any) {
       toast({
         title: "Erreur",
@@ -50,12 +51,13 @@ export function MarketActions() {
       // Appeler d'abord l'API d'initialisation pour s'assurer que la BD est prête
       await fetch("/api/init")
 
-      const result = await sellElectricity(Number.parseFloat(sellAmount))
+      await sellElectricity(Number.parseFloat(sellAmount))
       toast({
         title: "Vente effectuée avec succès!",
         description: `Vous avez vendu ${sellAmount} kWh pour un montant de ${(Number.parseFloat(sellAmount) * currentPrice * 0.95).toFixed(2)} €.`,
       })
       setSellAmount("25")
+      onTransactionComplete()
     } catch (error: any) {
       toast({
         title: "Erreur",

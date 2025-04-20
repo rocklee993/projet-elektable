@@ -112,7 +112,7 @@ const mockState = {
       amount: "87.80",
       status: "Payée",
       type: "Achat",
-      quantity: "500",
+      quantity: "250",
     },
   ],
   paymentMethods: [
@@ -176,6 +176,29 @@ function createTransaction(type: "Achat" | "Vente", quantity: number, paymentMet
   return { transaction, invoice };
 }
 
+const API_BASE_URL = 'http://localhost:5000/api';
+
+// Fonction utilitaire pour les appels API
+async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
+  const token = localStorage.getItem('token');
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(token && { Authorization: `Bearer ${token}` }),
+    ...options.headers,
+  };
+
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    ...options,
+    headers,
+  });
+
+  if (!response.ok) {
+    throw new Error(`API Error: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
 // Authentification
 export async function registerUser(userData: {
   firstName: string;
@@ -187,7 +210,7 @@ export async function registerUser(userData: {
   address: string;
   birthDate: Date;
 }) {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/register`, {
+  const response = await fetch(`${API_BASE_URL}/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(userData),
@@ -202,7 +225,7 @@ export async function registerUser(userData: {
 }
 
 export async function loginUser(credentials: { email: string; password: string }) {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/login`, {
+  const response = await fetch(`${API_BASE_URL}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(credentials),
@@ -256,84 +279,36 @@ export async function updateUserProfile(userData: {
 
 // Prix de l'électricité
 export async function getElectricityPrices() {
-  await delay(600);
-  return mockState.electricityPrices;
+  return fetchWithAuth('/electricity/prices');
 }
 
 export async function getCurrentPrice() {
-  await delay(300);
-  return { price: mockState.currentPrice };
+  return fetchWithAuth('/electricity/current-price');
 }
 
 // Transactions
 export async function buyElectricity(amount: number, useCard = false) {
-  await delay(1200);
-
-  const price = mockState.currentPrice;
-  const total = amount * price;
-
-  let fromBalance = 0;
-  let fromCard = 0;
-  let paymentMethod = "solde";
-
-  if (mockState.user.balance >= total && !useCard) {
-    fromBalance = total;
-    mockState.user.balance -= total;
-  } else {
-    fromBalance = Math.min(mockState.user.balance, total);
-    fromCard = total - fromBalance;
-    mockState.user.balance -= fromBalance;
-    paymentMethod = fromCard > 0 ? "carte" : "solde";
-  }
-
-  const { transaction, invoice } = createTransaction("Achat", amount, paymentMethod, price);
-
-  return {
-    success: true,
-    message: "Achat effectué avec succès",
-    transaction: {
-      ...transaction,
-      amountFromBalance: fromBalance,
-      amountFromCard: fromCard,
-    },
-    invoiceNumber: invoice.invoiceNumber,
-    balance: mockState.user.balance,
-  };
+  return fetchWithAuth('/transactions/buy', {
+    method: 'POST',
+    body: JSON.stringify({ amount, useCard }),
+  });
 }
 
 export async function sellElectricity(amount: number) {
-  await delay(1200);
-
-  const price = mockState.currentPrice;
-  const subtotal = amount * price;
-  const commission = subtotal * 0.05;
-  const totalReceived = subtotal - commission;
-
-  mockState.user.balance += totalReceived;
-
-  const { transaction, invoice } = createTransaction("Vente", amount, "solde", price, commission);
-
-  return {
-    success: true,
-    message: "Vente effectuée avec succès",
-    transaction: {
-      ...transaction,
-      commission,
-    },
-    invoiceNumber: invoice.invoiceNumber,
-    balance: mockState.user.balance,
-  };
+  return fetchWithAuth('/transactions/sell', {
+    method: 'POST',
+    body: JSON.stringify({ amount }),
+  });
 }
 
-export async function getTransactionHistory(limit = 10) {
-  await delay(800);
-  return mockState.transactions.slice(0, limit);
+export async function getTransactionHistory(limit = 5) {
+  return fetchWithAuth(`/transactions/history?limit=${limit}`);
 }
 
 // Factures
 export async function getInvoices() {
   const token = localStorage.getItem("token");
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/invoices`, {
+  const response = await fetch(`${API_BASE_URL}/invoices`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -367,8 +342,7 @@ export async function getInvoiceDetails(invoiceId: string) {
 
 // Solde utilisateur
 export async function getUserBalance() {
-  await delay(400);
-  return { balance: mockState.user.balance };
+  return fetchWithAuth('/users/balance');
 }
 
 export async function updateUserBalance(amount: number) {

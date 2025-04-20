@@ -1,23 +1,23 @@
-// db.js
 const mysql = require('mysql2');
 
-// Configuration de la connexion à la base de données
-const connection = mysql.createConnection({
-    host: 'localhost',      // Adresse du serveur MySQL
-    port: 3306,             // Port du serveur MySQL
-    user: 'root',           // Nom d'utilisateur MySQL
-    password: '',       // Mot de passe MySQL
-    database: 'elektable'    // Nom de la base de données
-});
+const config = {
+    host: process.env.DB_HOST || 'mariadb',
+    port: process.env.DB_PORT || 3306,
+    user: process.env.DB_USER || 'user',
+    password: process.env.DB_PASSWORD || 'userpass',
+    database: process.env.DB_NAME || 'app_db',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+};
 
-// Connexion à la base de données
-connection.connect((err) => {
-    if (err) {
-        console.error('Erreur de connexion à la base de données:', err.stack);
-        return;
-    }
-    console.log('Connecté à MySQL en tant qu’ID', connection.threadId);
-});
+console.log('🔧 Configuration de la base de données :');
+console.log(`   ➤ Hôte       : ${config.host}`);
+console.log(`   ➤ Port       : ${config.port}`);
+console.log(`   ➤ Utilisateur: ${config.user}`);
+console.log(`   ➤ Base       : ${config.database}`);
 
-// Exporter la connexion pour l'utiliser dans d'autres parties de l'application
-module.exports = connection;
+// ✅ Création immédiate du pool avec .promise()
+const db = mysql.createPool(config).promise();
+
+module.exports = db;

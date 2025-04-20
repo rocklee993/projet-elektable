@@ -1,6 +1,3 @@
-CREATE DATABASE IF NOT EXISTS elektable DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE elektable;
-
 CREATE TABLE utilisateur (
     id_utilisateur INT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(100) NOT NULL,

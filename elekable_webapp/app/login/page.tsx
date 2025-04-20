@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { toast } from "@/hooks/use-toast"
+import { loginUser } from "@/lib/api"
 
 const formSchema = z.object({
   email: z.string().email({
@@ -35,43 +36,24 @@ export default function LoginPage() {
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("Login form values:", values); // Debug log
-    setIsLoading(true);
+    setIsLoading(true)
   
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
-      });
-  
-      console.log("Response status:", response.status); // Debug log
-  
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.log("Error response:", errorData); // Debug log
-        throw new Error(errorData.message || 'Erreur de connexion.');
-      }
-  
-      const data = await response.json();
-      console.log("Login successful, data:", data); // Debug log
-      console.log("Token:", data.accessToken); // Debug log
-      localStorage.setItem('token', data.accessToken);
+      const data = await loginUser(values)
+      localStorage.setItem('token', data.accessToken)
       toast({
         title: 'Connexion réussie!',
         description: 'Bienvenue!',
-      });
-  
-      router.push('/dashboard');
+      })
+      router.push('/dashboard')
     } catch (error: any) {
-      console.error("Login error:", error); // Debug log
       toast({
         title: 'Erreur de connexion',
         description: error.message,
         variant: 'destructive',
-      });
+      })
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
   }
 

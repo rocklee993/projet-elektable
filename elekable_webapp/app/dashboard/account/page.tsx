@@ -1,6 +1,6 @@
 "use client"
 
-import { useState,useEffect } from "react"
+import { useState, useEffect } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { CalendarIcon, Loader2 } from "lucide-react"
 import { useForm } from "react-hook-form"
@@ -15,6 +15,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { toast } from "@/hooks/use-toast"
+import { getUserProfile, updateUserProfile } from "@/lib/api"
 
 const formSchema = z.object({
   firstName: z.string().min(2, {
@@ -38,9 +39,9 @@ const formSchema = z.object({
 })
 
 export default function AccountPage() {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [isFetching, setIsFetching] = useState(true);
+  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false)
+  const [isFetching, setIsFetching] = useState(true)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -51,108 +52,58 @@ export default function AccountPage() {
       phone: "",
       address: "",
     },
-  });
+  })
 
   // Fetch user data on page load
   useEffect(() => {
     const fetchUserData = async () => {
-      const token = localStorage.getItem("token");
-      console.log("Token:", token); // Debug log
-      if (!token) {
-        router.push("/login"); // Redirect to login if no token
-        return;
-      }
-  
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`, // Send the token in the Authorization header
-          },
-        });
-  
-        if (!response.ok) {
-          if (response.status === 401 || response.status === 403) {
-            toast({
-              title: "Session expirée",
-              description: "Veuillez vous reconnecter.",
-              variant: "destructive",
-            });
-            localStorage.removeItem("token"); // Clear the invalid token
-            router.push("/login");
-          }
-          throw new Error("Erreur lors de la récupération des données utilisateur");
-        }
-  
-        const data = await response.json();
+        const userData = await getUserProfile()
         form.reset({
-          firstName: data.firstName,
-          lastName: data.lastName,
-          email: data.email,
-          phone: data.phone,
-          address: data.address,
-          birthDate: new Date(data.birthDate), // Convert birthDate to a Date object
-        });
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          email: userData.email,
+          phone: userData.phone,
+          address: userData.address,
+          birthDate: new Date(userData.birthDate),
+        })
       } catch (error) {
-        console.error(error);
         toast({
           title: "Erreur",
           description: "Impossible de récupérer les données utilisateur.",
           variant: "destructive",
-        });
-        router.push("/login");
+        })
+        router.push("/login")
       } finally {
-        setIsFetching(false);
+        setIsFetching(false)
       }
-    };
-  
-    fetchUserData();
-  }, [form, router]);
+    }
+
+    fetchUserData()
+  }, [form, router])
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
+    setIsLoading(true)
   
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        toast({
-          title: "Erreur",
-          description: "Vous devez être connecté pour effectuer cette action.",
-          variant: "destructive",
-        });
-        router.push("/login");
-        return;
-      }
-  
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/me`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Send the token in the Authorization header
-        },
-        body: JSON.stringify(values),
-      });
-  
-      if (!response.ok) {
-        throw new Error("Erreur lors de la mise à jour du profil");
-      }
-  
+      await updateUserProfile(values)
       toast({
         title: "Profil mis à jour!",
         description: "Vos informations ont été mises à jour avec succès.",
-      });
-    } catch (error) {
+      })
+    } catch (error: any) {
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de la mise à jour du profil.",
+        description: error.message,
         variant: "destructive",
-      });
+      })
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
   }
 
   if (isFetching) {
-    return <div>Chargement des données utilisateur...</div>;
+    return <div>Chargement des données utilisateur...</div>
   }
 
   return (

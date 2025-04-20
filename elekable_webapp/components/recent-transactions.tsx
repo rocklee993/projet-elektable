@@ -18,44 +18,24 @@ interface Transaction {
 
 export function RecentTransactions() {
   const [transactions, setTransactions] = useState<Transaction[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
-        // Appeler d'abord l'API d'initialisation pour s'assurer que la BD est prête
-        await fetch("/api/init")
-
         const data = await getTransactionHistory(5)
         setTransactions(data)
-        setError(null)
       } catch (error) {
         console.error("Erreur lors de la récupération des transactions:", error)
-        setError("Impossible de charger les transactions")
       } finally {
-        setIsLoading(false)
+        setLoading(false)
       }
     }
 
     fetchTransactions()
   }, [])
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center p-4">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return <div className="text-center p-4 text-red-500">{error}</div>
-  }
-
-  if (transactions.length === 0) {
-    return <div className="text-center p-4 text-muted-foreground">Aucune transaction récente</div>
-  }
+  if (loading) return <div>Chargement...</div>
 
   return (
     <Table>
