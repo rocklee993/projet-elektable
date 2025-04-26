@@ -180,24 +180,41 @@ const API_BASE_URL = 'http://localhost:5000/api';
 
 // Fonction utilitaire pour les appels API
 async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
-  const token = localStorage.getItem('token');
-  const headers = {
+  const token = localStorage.getItem('accessToken');
+
+  if (!token) {
+    throw new Error('Non authentifié');
+  }
+
+  const customHeaders: HeadersInit = {
     'Content-Type': 'application/json',
-    ...(token && { Authorization: `Bearer ${token}` }),
-    ...options.headers,
+    'Authorization': `Bearer ${token}`,
+  };
+
+  const mergedHeaders = {
+    ...customHeaders,
+    ...(options.headers || {}),
   };
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
-    headers,
+    headers: mergedHeaders,
   });
 
+  if (response.status === 401 || response.status === 403) {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    throw new Error('Session expirée. Veuillez vous reconnecter.');
+  }
+
   if (!response.ok) {
-    throw new Error(`API Error: ${response.statusText}`);
+    const errorData = await response.json();
+    throw new Error(errorData.message || `API Error: ${response.statusText}`);
   }
 
   return response.json();
 }
+
 
 // Authentification
 export async function registerUser(userData: {
@@ -208,12 +225,18 @@ export async function registerUser(userData: {
   confirmPassword: string;
   phone: string;
   address: string;
-  birthDate: Date;
+  birthDate: string;
 }) {
+  // Convertir la date en objet Date
+  const formattedData = {
+    ...userData,
+    birthDate: new Date(userData.birthDate).toISOString().split('T')[0]
+  };
+
   const response = await fetch(`${API_BASE_URL}/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(userData),
+    body: JSON.stringify(formattedData),
   });
 
   if (!response.ok) {
@@ -221,7 +244,11 @@ export async function registerUser(userData: {
     throw new Error(errorData.message || 'Erreur lors de l\'inscription.');
   }
 
-  return response.json();
+  const data = await response.json();
+  if (data.token) {
+    localStorage.setItem('token', data.token);
+  }
+  return data;
 }
 
 export async function loginUser(credentials: { email: string; password: string }) {
@@ -231,16 +258,25 @@ export async function loginUser(credentials: { email: string; password: string }
     body: JSON.stringify(credentials),
   });
 
+  const data = await response.json();
+
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || 'Erreur de connexion.');
+    throw new Error(data.message || 'Erreur de connexion.');
   }
 
-  return response.json();
+  
+  if (data.token) {
+    localStorage.setItem('accessToken', data.token);
+  } else {
+    console.warn('No token in login response');
+  }
+  
+  return data;
 }
 
 export async function logoutUser() {
-  await delay(500);
+  localStorage.removeItem('accessToken');
+  localStorage.removeItem('refreshToken');
   return {
     success: true,
     message: "Déconnexion réussie",

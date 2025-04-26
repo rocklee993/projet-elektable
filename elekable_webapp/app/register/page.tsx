@@ -38,8 +38,8 @@ const formSchema = z
     address: z.string().min(5, {
       message: "L'adresse doit contenir au moins 5 caractères",
     }),
-    birthDate: z.date({
-      required_error: "Veuillez sélectionner votre date de naissance",
+    birthDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {
+      message: "La date doit être au format YYYY-MM-DD",
     }),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -61,6 +61,7 @@ export default function RegisterPage() {
       confirmPassword: "",
       phone: "",
       address: "",
+      birthDate: "",
     },
   })
 
@@ -68,12 +69,14 @@ export default function RegisterPage() {
     setIsLoading(true)
   
     try {
-      await registerUser(values)
-      toast({
-        title: 'Compte créé avec succès!',
-        description: 'Vous allez être redirigé vers la page de connexion.',
-      })
-      router.push('/login')
+      const response = await registerUser(values)
+      if (response.success) {
+        toast({
+          title: 'Compte créé avec succès!',
+          description: 'Vous allez être redirigé vers la page de connexion.',
+        })
+        router.push('/login')
+      }
     } catch (error: any) {
       toast({
         title: 'Erreur',
@@ -98,7 +101,7 @@ export default function RegisterPage() {
         </div>
         <div className="grid gap-6">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -198,30 +201,11 @@ export default function RegisterPage() {
                 control={form.control}
                 name="birthDate"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col">
+                  <FormItem>
                     <FormLabel>Date de naissance</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
-                          >
-                            {field.value ? field.value.toLocaleDateString() : <span>Sélectionner une date</span>}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
                     <FormDescription>Vous devez avoir au moins 18 ans pour créer un compte.</FormDescription>
                     <FormMessage />
                   </FormItem>
